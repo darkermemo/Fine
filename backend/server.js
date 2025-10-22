@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const path = require('path');
 const http = require('http');
 const socketio = require('socket.io');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -20,6 +22,45 @@ const io = socketio(server, {
     methods: ['GET', 'POST']
   }
 });
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Off The Record API',
+      version: '2.0.0',
+      description: 'Traffic ticket fighting platform API with lawyer matching, payments, and case management',
+      contact: {
+        name: 'Off The Record Team',
+        email: 'support@offtherecord.com'
+      }
+    },
+    servers: [
+      {
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://fine-production.up.railway.app' 
+          : `http://localhost:${process.env.PORT || 5000}`,
+        description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    }
+  },
+  apis: ['./routes/*.js'], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Swagger UI route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware
 app.use(cors());
