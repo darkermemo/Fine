@@ -69,6 +69,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Create upload directories if they don't exist
 const fs = require('fs');
@@ -121,9 +122,16 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       payments: '/api/payments',
       dashboard: '/api/dashboard',
-      health: '/health'
+      health: '/health',
+      ui: '/index-arabic.html',
+      docs: '/api-docs'
     }
   });
+});
+
+// Serve Arabic UI
+app.get('/ui', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/public/index-arabic.html'));
 });
 
 // Socket.IO connection handling
