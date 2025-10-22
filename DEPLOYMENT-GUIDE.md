@@ -245,6 +245,78 @@ curl -X GET http://localhost:5001/api/admin/subscription/analytics \
 
 ---
 
+## 🚀 Railway Deployment
+
+### Step 1: Prepare Your Repository
+
+1. **Ensure railway.toml is configured** (already done):
+   ```toml
+   [build]
+   builder = "nixpacks"
+
+   [deploy]
+   startCommand = "npm start"
+   ```
+
+2. **Push your code to GitHub** (Railway will deploy from GitHub)
+
+### Step 2: Set Up Environment Variables in Railway
+
+1. **Go to Railway Dashboard** → Your Project → Settings → Variables
+
+2. **Add these environment variables**:
+
+   ```bash
+   # Supabase Configuration (Required)
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_KEY=your-supabase-service-key
+
+   # Server Configuration
+   NODE_ENV=production
+   PORT=5000
+
+   # Client URL (replace with your Railway app URL)
+   CLIENT_URL=https://your-app-name.railway.app
+
+   # Stripe Configuration (if using payments)
+   STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+   STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-publishable-key
+   STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+
+   # JWT Configuration
+   JWT_SECRET=your-jwt-secret-key
+   JWT_EXPIRE=7d
+
+   # Email Configuration (if using notifications)
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-password
+   ```
+
+### Step 3: Configure Stripe Webhooks for Railway
+
+1. **Get your Railway app URL** from Railway dashboard
+2. **In Stripe Dashboard** → Developers → Webhooks:
+   - Add endpoint: `https://your-app-name.railway.app/api/webhooks/stripe`
+   - Select events: checkout.session.completed, invoice.payment_failed, etc.
+   - Copy the webhook secret to Railway environment variables
+
+### Step 4: Deploy
+
+1. **Connect Railway to your GitHub repository**
+2. **Railway will automatically detect and deploy** your Node.js app
+3. **Monitor the deployment logs** to ensure it starts successfully
+
+### Step 5: Verify Deployment
+
+1. **Check the health endpoint**: `https://your-app-name.railway.app/health`
+2. **Test the API**: `https://your-app-name.railway.app/`
+3. **Check Railway logs** for any errors
+
+---
+
 ## 🌐 Production Deployment
 
 ### Before Going Live
