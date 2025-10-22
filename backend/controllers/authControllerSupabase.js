@@ -15,10 +15,7 @@ exports.register = async (req, res) => {
 
     // Validate input
     if (!email || !password || !firstName || !lastName || !phone) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields: email, password, firstName, lastName, phone'
-      });
+      return res.error('errors.validationError', 400, 'Please provide all required fields: email, password, firstName, lastName, phone');
     }
 
     // Create user in Supabase Auth with email pre-confirmed (for development)
@@ -35,10 +32,10 @@ exports.register = async (req, res) => {
 
     if (authError) {
       console.error('Auth creation error:', authError);
-      return res.status(400).json({
-        success: false,
-        message: authError.message || 'Error creating user'
-      });
+      if (authError.message.includes('already registered')) {
+        return res.error('auth.userExists', 400);
+      }
+      return res.error('errors.serverError', 400, authError.message);
     }
 
     // Get role ID
@@ -52,10 +49,7 @@ exports.register = async (req, res) => {
       console.error('Role fetch error:', roleError);
       // Delete auth user if profile creation fails
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid role specified'
-      });
+      return res.error('errors.invalidInput', 400, 'Invalid role specified');
     }
 
     // Create profile in database
@@ -77,10 +71,7 @@ exports.register = async (req, res) => {
       console.error('Profile creation error:', profileError);
       // Delete auth user if profile creation fails
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      return res.status(400).json({
-        success: false,
-        message: 'Error creating user profile'
-      });
+      return res.error('errors.serverError', 400, 'Error creating user profile');
     }
 
     // Generate JWT token
@@ -91,30 +82,22 @@ exports.register = async (req, res) => {
       { expiresIn: '30d' }
     );
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      data: {
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          firstName,
-          lastName,
-          phone,
-          role
-        },
-        profile,
-        token
-      }
-    });
+    res.success({
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        firstName,
+        lastName,
+        phone,
+        role
+      },
+      profile,
+      token
+    }, 'auth.registerSuccess', 201);
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error registering user',
-      error: error.message
-    });
+    res.error('errors.serverError', 500, error.message);
   }
 };
 
@@ -127,10 +110,7 @@ exports.login = async (req, res) => {
 
     // Validate input
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide email and password'
-      });
+      return res.error('errors.validationError', 400, 'Please provide email and password');
     }
 
     // Create a temporary client for this user to sign in
@@ -144,10 +124,7 @@ exports.login = async (req, res) => {
     });
 
     if (authError || !authData.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
+      return res.error('auth.invalidCredentials', 401);
     }
 
     // Get user profile
@@ -158,10 +135,7 @@ exports.login = async (req, res) => {
       .single();
 
     if (profileError || !profile) {
-      return res.status(401).json({
-        success: false,
-        message: 'User profile not found'
-      });
+      return res.error('auth.invalidCredentials', 401);
     }
 
     // Update last login
@@ -184,33 +158,26 @@ exports.login = async (req, res) => {
     // Use the session token from Supabase
     const token = authData.session?.access_token || authData.user.id;
 
-    res.status(200).json({
-      success: true,
-      data: {
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          phone: profile.phone,
-          role: profile.roles?.name,
-          isVerified: profile.is_verified,
-          profileImageUrl: profile.profile_image_url
-        },
-        profile,
-        lawyerProfile,
-        token,
-        refreshToken: authData.session?.refresh_token
-      }
-    });
+    res.success({
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        firstName: profile.first_name,
+        lastName: profile.last_name,
+        phone: profile.phone,
+        role: profile.roles?.name,
+        isVerified: profile.is_verified,
+        profileImageUrl: profile.profile_image_url
+      },
+      profile,
+      lawyerProfile,
+      token,
+      refreshToken: authData.session?.refresh_token
+    }, 'auth.loginSuccess');
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error logging in',
-      error: error.message
-    });
+    res.error('errors.serverError', 500, error.message);
   }
 };
 

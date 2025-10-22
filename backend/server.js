@@ -13,6 +13,9 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 // Initialize Supabase
 const { supabaseAdmin } = require('./config/supabase');
 
+// Initialize i18n
+const { i18nMiddleware } = require('./middleware/i18n');
+
 // Initialize express app
 const app = express();
 const server = http.createServer(app);
@@ -66,6 +69,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(i18nMiddleware); // Add i18n middleware
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
