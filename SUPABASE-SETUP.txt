@@ -1,0 +1,589 @@
+═══════════════════════════════════════════════════════════════════════════════
+OFF-THE-RECORD-APP: SUPABASE COMPLETE SETUP GUIDE
+Version: 2.0.0 (Supabase Edition)
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK START - 5 MINUTES
+
+1. Supabase Project Already Created
+   - URL: https://hzulecfeysuxatmmyxzc.supabase.co
+   - Your credentials are secure and ready to use
+
+2. Environment Setup
+   - Copy backend/.env.example to backend/.env
+   - Add your SUPABASE_SERVICE_KEY (from Supabase Settings > API)
+   - Add STRIPE_SECRET_KEY for payments
+
+3. Install Dependencies
+   cd off-the-record-app
+   npm install
+
+4. Initialize Database Schema
+   - Go to Supabase Dashboard > SQL Editor
+   - Copy entire content from: backend/config/supabase-schema.sql
+   - Paste and execute
+
+5. Start Server
+   npm run dev
+   Server runs on: http://localhost:5000
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 STEP-BY-STEP SETUP INSTRUCTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: SUPABASE DATABASE INITIALIZATION
+─────────────────────────────────────────
+
+1.1 Access Your Supabase Dashboard
+   - Go to: https://app.supabase.com
+   - Select your project: "off-the-record-app"
+
+1.2 Execute Database Schema
+   - Go to: SQL Editor (left sidebar)
+   - Click: "New Query"
+   - Copy all content from: backend/config/supabase-schema.sql
+   - Paste into the SQL editor
+   - Click: "Run" or press Ctrl+Enter
+   - Wait for confirmation (should take 5-10 seconds)
+
+1.3 Verify Tables Created
+   Go to: Database > Tables
+   You should see these tables:
+   ✓ roles
+   ✓ profiles
+   ✓ lawyer_profiles
+   ✓ cases
+   ✓ case_documents
+   ✓ case_notes
+   ✓ case_timeline
+   ✓ messages
+   ✓ payments
+   ✓ invoices
+   ✓ transactions
+   ✓ refunds
+   ✓ subscriptions
+   ✓ analytics
+   ✓ support_tickets
+   ✓ audit_logs
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 2: ENVIRONMENT CONFIGURATION
+─────────────────────────────────
+
+2.1 Create .env file
+   cd backend
+   cp .env.example .env
+
+2.2 Get Your Credentials
+   Go to: Supabase Dashboard > Settings > API
+   
+   Copy these values to .env:
+   - SUPABASE_URL = (already provided above)
+   - SUPABASE_ANON_KEY = (already provided above)
+   - SUPABASE_SERVICE_KEY = Copy from "Service Role" section
+
+2.3 Add Other Configuration
+   .env Example:
+   ───────────────────────────
+   SUPABASE_URL=https://hzulecfeysuxatmmyxzc.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   
+   NODE_ENV=development
+   PORT=5000
+   CLIENT_URL=http://localhost:3000
+   
+   STRIPE_SECRET_KEY=sk_test_your_stripe_key
+   STRIPE_PUBLIC_KEY=pk_test_your_stripe_key
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+   ───────────────────────────
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 3: INSTALL DEPENDENCIES
+────────────────────────────
+
+npm install
+
+This installs:
+✓ @supabase/supabase-js
+✓ @supabase/auth-helpers-express
+✓ stripe
+✓ express, cors, dotenv
+✓ All other required packages
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 4: DATABASE STRUCTURE OVERVIEW
+───────────────────────────────────
+
+ROLES (5 types with permissions):
+  ├── user: Regular customer who creates cases
+  ├── lawyer: Attorney who handles cases
+  ├── admin: Full platform access
+  ├── technical_support: Can view/resolve technical issues
+  └── business_support: Can manage finances/invoices
+
+TABLES & RELATIONSHIPS:
+
+  Profiles (Users)
+  ├── Extends Supabase Auth
+  ├── Has: first_name, last_name, phone, bio
+  ├── Has one: lawyer_profiles (if role=lawyer)
+  └── Connected to: cases, messages, payments
+
+  Cases (Tickets)
+  ├── Ticket Details: violation_type, ticket_number, date
+  ├── Court Info: court_name, address, phone
+  ├── Pricing: quoted_price, actual_price, discount
+  ├── Payment: payment_status, paid_at
+  └── Outcome: outcome_type, final_fine, final_points
+
+  Payments
+  ├── Stripe Integration: payment_intent_id, charge_id
+  ├── Tracks: amount, status, payment_method
+  ├── Links to: cases, users, lawyers
+  └── Creates: transaction records automatically
+
+  Transactions (Financial Flow)
+  ├── From: user → To: lawyer
+  ├── Calculates: platform_fee (10%), lawyer_payout (90%)
+  ├── Tracks: payout_status (pending/completed)
+  └── For: dashboards, financial reports
+
+  Invoices
+  ├── Generated for: users or lawyers
+  ├── Contains: line_items, tax, discount
+  ├── Status: draft → sent → paid
+  └── Linked to: cases, payments
+
+  Messages (Real-time)
+  ├── Case-based communication
+  ├── Between: user ↔ lawyer
+  ├── Features: read status, notifications
+  └── Socket.IO enabled
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 5: START THE SERVER
+───────────────────────
+
+npm run dev
+
+Expected Output:
+  ╔════════════════════════════════════════════════════════╗
+  ║   🚗 Off The Record API Server Running 🚗            ║
+  ║                  (Supabase Edition)                   ║
+  ║   Port: 5000                                          ║
+  ║   Environment: development                            ║
+  ║   Database: Supabase PostgreSQL                       ║
+  ║   URL: https://hzulecfeysuxatmmyxzc.supabase.co      ║
+  ╚════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 6: API ENDPOINTS OVERVIEW
+──────────────────────────────
+
+AUTHENTICATION ENDPOINTS:
+
+POST /api/auth/register
+  Create new user account
+  Body: {
+    email: "user@example.com",
+    password: "securePassword123",
+    firstName: "John",
+    lastName: "Doe",
+    phone: "+1234567890",
+    role: "user" // or "lawyer"
+  }
+
+POST /api/auth/login
+  Login user
+  Body: {
+    email: "user@example.com",
+    password: "securePassword123"
+  }
+
+GET /api/auth/me (Protected)
+  Get current user profile
+
+PUT /api/auth/profile (Protected)
+  Update user profile
+
+POST /api/auth/refresh-token
+  Refresh expired token
+
+POST /api/auth/logout (Protected)
+  Logout user
+
+─────────────────────────────────────────────────────────────
+
+PAYMENT ENDPOINTS:
+
+POST /api/payments/create (Protected)
+  Create a payment
+  Body: {
+    caseId: "uuid",
+    amount: 299.99,
+    paymentType: "case_payment",
+    paymentMethodId: "pm_stripe_id",
+    description: "Case handling fee"
+  }
+
+GET /api/payments (Protected)
+  List user's payments
+  Query: ?status=completed&limit=10&offset=0
+
+GET /api/payments/:paymentId (Protected)
+  Get specific payment details
+
+POST /api/invoices/create (Protected)
+  Create invoice
+  Body: {
+    userId: "profile_id",
+    lawyerId: "lawyer_id",
+    caseId: "case_id",
+    lineItems: [
+      {
+        description: "Case handling",
+        quantity: 1,
+        unitPrice: 299.99
+      }
+    ],
+    taxPercentage: 5,
+    notes: "Payment due in 30 days"
+  }
+
+GET /api/invoices (Protected)
+  List invoices
+
+GET /api/transactions (Protected)
+  List all transactions
+
+POST /api/refunds/create (Protected)
+  Request refund
+  Body: {
+    paymentId: "payment_id",
+    reason: "Client request",
+    amount: 299.99
+  }
+
+─────────────────────────────────────────────────────────────
+
+DASHBOARD ENDPOINTS:
+
+GET /api/dashboard/user (Protected)
+  User dashboard with:
+  - Total cases, total spent
+  - Case breakdown by status
+  - Recent cases and payments
+  - Pending invoices count
+
+GET /api/dashboard/lawyer (Protected)
+  Lawyer dashboard with:
+  - Assigned cases
+  - Earnings (completed & pending)
+  - Success rate
+  - Average rating
+  - Recent cases
+  - Pending invoices
+
+GET /api/dashboard/admin (Protected, Admin Only)
+  Admin dashboard with:
+  - Platform-wide statistics
+  - Total revenue, fees
+  - User breakdown by role
+  - Case success metrics
+  - Pending payouts
+
+GET /api/dashboard/analytics (Protected, Admin/Support)
+  Analytics metrics by period
+  Query: ?period=monthly&startDate=2024-01-01&endDate=2024-12-31
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 7: USER ROLES & PERMISSIONS TEST
+─────────────────────────────────────
+
+Test each role by registering with different accounts:
+
+1. CREATE REGULAR USER:
+   POST /api/auth/register
+   {
+     "email": "customer@example.com",
+     "password": "Test123!",
+     "firstName": "Sarah",
+     "lastName": "Johnson",
+     "phone": "+1-555-0101",
+     "role": "user"
+   }
+
+2. CREATE LAWYER:
+   POST /api/auth/register
+   {
+     "email": "lawyer@example.com",
+     "password": "Test123!",
+     "firstName": "James",
+     "lastName": "Smith",
+     "phone": "+1-555-0102",
+     "role": "lawyer"
+   }
+
+3. CREATE ADMIN (in Supabase):
+   - Go to Supabase > Database > profiles
+   - Insert new profile with role_id = 3 (admin)
+   - Manually create auth user in Supabase Auth
+
+4. CREATE TECHNICAL SUPPORT:
+   - Similar to admin, role_id = 4
+
+5. CREATE BUSINESS SUPPORT:
+   - Similar to admin, role_id = 5
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 8: TESTING PAYMENTS & TRANSACTIONS
+───────────────────────────────────────
+
+1. REGISTER USER & LAWYER
+
+2. LOGOUT AS USER, LOGIN AS LAWYER
+
+3. CREATE CASE (User):
+   - Create traffic ticket case
+   - Set quoted_price = $299.99
+
+4. ASSIGN CASE (Admin):
+   - Assign to lawyer
+   - Case status → "assigned"
+
+5. CREATE PAYMENT (User):
+   POST /api/payments/create
+   {
+     "caseId": "case_uuid",
+     "amount": 299.99,
+     "paymentType": "case_payment",
+     "paymentMethodId": "pm_test_visa", // Stripe test token
+     "description": "Traffic ticket handling"
+   }
+
+6. VERIFY TRANSACTION:
+   GET /api/transactions
+   
+   Should show:
+   - Payment from user to lawyer
+   - Platform fee: $29.99 (10%)
+   - Lawyer payout: $269.99 (90%)
+   - Status: "completed"
+   - lawyer_payout_status: "pending"
+
+7. CHECK LAWYER DASHBOARD:
+   GET /api/dashboard/lawyer
+   
+   Should show:
+   - earnings.pending: $269.99
+   - totalCases: 1
+   - caseBreakdown
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 9: INVOICE & REFUND TESTING
+────────────────────────────────
+
+1. CREATE INVOICE:
+   POST /api/invoices/create
+   {
+     "userId": "user_uuid",
+     "lawyerId": "lawyer_uuid",
+     "caseId": "case_uuid",
+     "lineItems": [
+       {
+         "description": "Traffic ticket case handling",
+         "quantity": 1,
+         "unitPrice": 299.99
+       }
+     ],
+     "taxPercentage": 5,
+     "discountAmount": 20,
+     "notes": "Due in 30 days"
+   }
+
+2. GET INVOICES:
+   GET /api/invoices
+   
+   Lists all invoices with totals
+
+3. CREATE REFUND:
+   POST /api/refunds/create
+   {
+     "paymentId": "payment_uuid",
+     "reason": "Client withdrawal",
+     "amount": 299.99
+   }
+
+4. VERIFY PAYMENT UPDATED:
+   GET /api/payments/:paymentId
+   
+   Should show: status = "refunded"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 10: DASHBOARD & ANALYTICS TESTING
+──────────────────────────────────────
+
+1. USER DASHBOARD:
+   GET /api/dashboard/user
+   {
+     "totalCases": 1,
+     "totalSpent": 299.99,
+     "caseBreakdown": {
+       "pending": 0,
+       "assigned": 0,
+       "inProgress": 1,
+       "dismissed": 0,
+       "reduced": 0
+     }
+   }
+
+2. LAWYER DASHBOARD:
+   GET /api/dashboard/lawyer
+   {
+     "totalCases": 1,
+     "earnings": {
+       "total": 269.99,
+       "completed": 0,
+       "pending": 269.99
+     }
+   }
+
+3. ADMIN DASHBOARD:
+   GET /api/dashboard/admin
+   {
+     "totals": {
+       "users": 2,
+       "cases": 1,
+       "payments": 1,
+       "transactions": 1
+     },
+     "financial": {
+       "totalRevenue": 299.99,
+       "totalFees": 29.99,
+       "averageTransactionSize": 299.99
+     }
+   }
+
+4. ANALYTICS:
+   GET /api/dashboard/analytics?period=monthly
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STRIPE TEST CARDS (for testing payments)
+────────────────────────────────────────
+
+Success:  4242 4242 4242 4242
+Declined: 4000 0000 0000 0002
+3D Sec:   4000 0025 0000 3155
+
+Expiry: Any future date (e.g., 12/25)
+CVC: Any 3 digits
+
+═══════════════════════════════════════════════════════════════════════════════
+
+AUTHENTICATION TOKEN USAGE
+──────────────────────────
+
+All protected endpoints require Authorization header:
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Example with curl:
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  http://localhost:5000/api/auth/me
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING
+───────────────
+
+Issue: "SUPABASE_SERVICE_KEY not found"
+Solution: Check .env file has SUPABASE_SERVICE_KEY set correctly
+
+Issue: "User profile not found" during login
+Solution: Ensure profiles table has corresponding profile for auth user
+
+Issue: Payment fails with Stripe error
+Solution: Use test card 4242... from test cards section
+
+Issue: "Not authorized" on protected endpoints
+Solution: Include valid JWT token in Authorization header
+
+Issue: Socket.IO connection fails
+Solution: Ensure CLIENT_URL in .env matches frontend URL
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FILE STRUCTURE
+──────────────
+
+backend/
+├── config/
+│   ├── supabase.js (Supabase client initialization)
+│   └── supabase-schema.sql (Database schema - execute this!)
+├── middleware/
+│   └── supabase-auth.js (JWT verification & role checks)
+├── controllers/
+│   ├── authControllerSupabase.js (Auth logic)
+│   ├── paymentControllerSupabase.js (Payments/invoices/transactions)
+│   └── dashboardControllerSupabase.js (Analytics & dashboards)
+├── routes/
+│   ├── authRoutesSupabase.js
+│   ├── paymentRoutesSupabase.js
+│   └── dashboardRoutesSupabase.js
+├── server.js (Main server file - Supabase version)
+└── .env (Environment variables)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PRODUCTION CHECKLIST
+────────────────────
+
+Before deploying to production:
+
+□ Update .env with production Supabase URL
+□ Use production Stripe keys (sk_live_...)
+□ Set NODE_ENV=production
+□ Enable RLS (Row Level Security) policies
+□ Set up CORS for frontend domain
+□ Configure Supabase backup schedule
+□ Set up SSL/TLS for database connection
+□ Enable Supabase audit logs
+□ Configure rate limiting
+□ Set up monitoring & alerts
+□ Test all payment flows end-to-end
+□ Validate all user roles & permissions
+□ Set up CI/CD pipeline
+
+═══════════════════════════════════════════════════════════════════════════════
+
+NEXT STEPS
+──────────
+
+1. ✓ Initialize database schema
+2. ✓ Configure environment variables
+3. ✓ Start backend server
+4. ✓ Test authentication flows
+5. ✓ Test payment system
+6. ✓ Test dashboards
+7. → Connect frontend to API
+8. → Deploy to production
+
+═══════════════════════════════════════════════════════════════════════════════
+
+For issues or questions, refer to:
+- Supabase Docs: https://supabase.com/docs
+- Stripe Docs: https://stripe.com/docs
+- API Routes: See step 6 (endpoints)
+
+═══════════════════════════════════════════════════════════════════════════════

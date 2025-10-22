@@ -1,0 +1,42 @@
+{
+  "name": "off-the-record-app",
+  "version": "1.0.0",
+  "description": "Full-stack traffic ticket fighting platform with lawyer matching, payments, and case management",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node backend/utils/seeder.js"
+  },
+  "keywords": [
+    "traffic-tickets",
+    "legal-tech",
+    "lawyer-matching",
+    "case-management",
+    "payments"
+  ],
+  "author": "Off The Record Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.9",
+    "pg": "^8.16.3",
+    "socket.io": "^4.8.1",
+    "stripe": "^19.1.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

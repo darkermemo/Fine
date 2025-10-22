@@ -1,0 +1,361 @@
+{
+  "info": {
+    "name": "Off The Record API",
+    "description": "Complete API collection for Off The Record traffic ticket platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "lawyer_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"New\",\n  \"lastName\": \"User\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"user\"\n}"
+            },
+            "url": "{{base_url}}/auth/register"
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"user123\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@offtherecord.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cases",
+      "item": [
+        {
+          "name": "Create Case",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "ticketImage", "type": "file", "src": ""},
+                {
+                  "key": "ticketDetails",
+                  "value": "{\"violationType\":\"speeding\",\"issueDate\":\"2024-01-15\",\"location\":{\"state\":\"WA\",\"city\":\"Seattle\",\"court\":{\"name\":\"Seattle Municipal Court\"}},\"speedDetails\":{\"actualSpeed\":70,\"speedLimit\":60},\"fine\":150}",
+                  "type": "text"
+                },
+                {
+                  "key": "clientInfo",
+                  "value": "{\"isCDLDriver\":false}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{base_url}}/cases"
+          }
+        },
+        {
+          "name": "Get My Cases",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/cases"
+          }
+        },
+        {
+          "name": "Get Case by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/cases/:caseId"
+          }
+        },
+        {
+          "name": "Update Case Status (Lawyer)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{lawyer_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"note\": \"Filed motion to dismiss with court\",\n  \"courtDate\": \"2024-02-20\"\n}"
+            },
+            "url": "{{base_url}}/cases/:caseId/status"
+          }
+        },
+        {
+          "name": "Rate Lawyer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"review\": \"Excellent service! Highly recommended.\"\n}"
+            },
+            "url": "{{base_url}}/cases/:caseId/rate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lawyers",
+      "item": [
+        {
+          "name": "Register as Lawyer",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenseNumber\": \"WA-54321\",\n  \"barAssociation\": \"Washington State Bar\",\n  \"yearsOfExperience\": 8,\n  \"specializations\": [\"speeding\", \"dui\"],\n  \"jurisdictions\": [{\n    \"state\": \"WA\",\n    \"counties\": [\"King\", \"Pierce\"]\n  }],\n  \"bio\": \"Experienced traffic attorney...\",\n  \"pricing\": {\n    \"baseFee\": 249\n  }\n}"
+            },
+            "url": "{{base_url}}/lawyers/register"
+          }
+        },
+        {
+          "name": "Get My Lawyer Profile",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{lawyer_token}}"}],
+            "url": "{{base_url}}/lawyers/profile/me"
+          }
+        },
+        {
+          "name": "Get Lawyer Statistics",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{lawyer_token}}"}],
+            "url": "{{base_url}}/lawyers/statistics/me"
+          }
+        },
+        {
+          "name": "Search Lawyers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/lawyers/search?state=WA&specialization=speeding"
+          }
+        },
+        {
+          "name": "Toggle Availability",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{lawyer_token}}"}],
+            "url": "{{base_url}}/lawyers/availability"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment Intent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"case_id_here\",\n  \"amount\": 249\n}"
+            },
+            "url": "{{base_url}}/payments/create-intent"
+          }
+        },
+        {
+          "name": "Confirm Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentIntentId\": \"pi_xxx\",\n  \"paymentId\": \"payment_id\"\n}"
+            },
+            "url": "{{base_url}}/payments/confirm"
+          }
+        },
+        {
+          "name": "Request Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Case lost - money back guarantee\"\n}"
+            },
+            "url": "{{base_url}}/payments/:paymentId/refund"
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/payments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseId\": \"case_id\",\n  \"receiverId\": \"user_id\",\n  \"content\": \"Hello, I've reviewed your case...\"\n}"
+            },
+            "url": "{{base_url}}/messages"
+          }
+        },
+        {
+          "name": "Get Case Messages",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/messages/:caseId"
+          }
+        },
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/messages/conversations"
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "{{base_url}}/messages/unread/count"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/admin/stats"
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/admin/users?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Pending Lawyers",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/admin/lawyers/pending"
+          }
+        },
+        {
+          "name": "Approve Lawyer",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/admin/lawyers/:lawyerId/approve"
+          }
+        },
+        {
+          "name": "Get All Cases",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_token}}"}],
+            "url": "{{base_url}}/admin/cases?page=1&status=pending"
+          }
+        },
+        {
+          "name": "Assign Lawyer to Case",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{admin_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lawyerId\": \"lawyer_id_here\"\n}"
+            },
+            "url": "{{base_url}}/admin/cases/:caseId/assign"
+          }
+        }
+      ]
+    }
+  ]
+}
